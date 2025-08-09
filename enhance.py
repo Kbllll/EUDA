@@ -42,26 +42,20 @@ class Enhancer:
             pepper_indices = indices[num_salt:]
 
             # 计算每个特征的最大值和最小值
-            max_vals, _ = torch.max(noisy_data, dim=0)  # 按特征维度计算最大值
-            min_vals, _ = torch.min(noisy_data, dim=0)  # 按特征维度计算最小值
+            max_vals, _ = torch.max(noisy_data, dim=0) 
+            min_vals, _ = torch.min(noisy_data, dim=0)
 
             # 处理盐噪声
             if num_salt > 0:
-                # 计算每个索引对应的特征索引
                 feature_indices = salt_indices % noisy_data.shape[1]
-                # 获取对应特征的最大值并乘以1.1
                 salt_values = max_vals[feature_indices] * 1.1
-                # 应用盐噪声
                 noisy_data.view(-1)[salt_indices] = salt_values
 
             # 处理椒噪声
             num_pepper = num_noise - num_salt
             if num_pepper > 0:
-                # 计算每个索引对应的特征索引
                 feature_indices = pepper_indices % noisy_data.shape[1]
-                # 获取对应特征的最小值并乘以0.9，与0取较小值
                 pepper_values = torch.min(min_vals[feature_indices] * 0.9)
-                # 应用椒噪声
                 noisy_data.view(-1)[pepper_indices] = pepper_values
             return noisy_data, y
 
@@ -70,36 +64,29 @@ class Enhancer:
             # 创建数据副本，避免修改原始数据
             augmented_data = x.clone()
             num_samples, num_features = augmented_data.shape
-            device = self.args.device  # 获取数据所在设备
+            device = self.args.device  
 
-            # 计算时间掩码大小
             time_mask_size = int(self.args.mask_ratio * num_samples)
 
-            # 应用时间掩码 (掩盖整个样本)
             if time_mask_size > 0 and num_samples > time_mask_size:
                 # 随机生成掩码起始位置
                 start = torch.randint(0, num_samples - time_mask_size + 1, (1,), device=device).item()
                 end = start + time_mask_size
 
                 # 计算每个特征列的均值
-                feature_means = torch.mean(augmented_data, dim=0)  # 形状: [特征数]
+                feature_means = torch.mean(augmented_data, dim=0) 
 
-                # 应用时间掩码（使用向量化操作替代循环）
                 augmented_data[start:end, :] = feature_means.unsqueeze(0)
 
-            # 计算频率掩码大小
             freq_mask_size = int(self.args.mask_ratio * num_features)
 
             # 应用频率掩码 (掩盖整个特征)
             if freq_mask_size > 0 and num_features > freq_mask_size:
-                # 随机生成掩码起始位置
                 start = torch.randint(0, num_features - freq_mask_size + 1, (1,), device=device).item()
                 end = start + freq_mask_size
 
-                # 计算每个样本行的均值
                 sample_means = torch.mean(augmented_data, dim=1)  # 形状: [样本数]
 
-                # 应用频率掩码（使用向量化操作替代循环）
                 augmented_data[:, start:end] = sample_means.unsqueeze(1)
 
             return augmented_data, y
@@ -109,9 +96,8 @@ class Enhancer:
 
             augmented_data = x.clone()
             num_samples, num_features = augmented_data.shape
-            device = augmented_data.device  # 获取数据所在设备
+            device = augmented_data.device  
 
-            # 计算掩码大小
             sample_mask_size = max(1, int(self.args.mask_ratio * num_samples))
             feature_mask_size = max(1, int(self.args.mask_ratio * num_features))
 
@@ -137,3 +123,4 @@ class Enhancer:
             return augmented_data, y
 
         raise Exception('Unknown enhancement')
+
