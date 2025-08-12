@@ -14,3 +14,6 @@ main.py: Running;
 model.py: MLP;
 
 utils.py: Toolkit.
+
+
+(For the experimental code of EDL, please refer to https://github.com/teddykoker/evidential-learning-pytorch.)
